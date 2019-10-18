@@ -18,7 +18,15 @@ class ParSpec extends WordSpec with Matchers {
       val ints = List(1, 2)
       val ps: List[Par[Int]] = ints.map(unit)
       val result = sequence(ps)
-      Par.run(es)(result).get() should equal(ints)
+      Par.run(es)(result).get should equal(ints)
+    }
+  }
+
+  "parFilter" should {
+    "filter a List" in {
+      val ints = List(1, 2, 3)
+      val f = (x: Int) => x > 2
+      Par.run(es)(parFilter(ints)(f)).get should equal(ints.filter(f))
     }
   }
 }

@@ -53,6 +53,16 @@ object Par {
     ps.foldRight(unit[List[A]](Nil)) { (p, acc) =>
       map2(p, acc)(_ :: _)
     }
+
+  def asyncF[A, B](f: A => B): A => Par[B] = (a) => fork(unit(f(a)))
+
+  def parMap[A, B](as: List[A])(f: A => B): Par[List[B]] = fork {
+    sequence(as.map(asyncF(f)))
+  }
+
+  def parFilter[A](as: List[A])(f: A => Boolean): Par[List[A]] =
+    map(sequence(as.map(asyncF(a => if (f(a)) List(a) else List()))))(_.flatten)
+
   /* Gives us infix syntax for `Par`. */
   implicit def toParOps[A](p: Par[A]): ParOps[A] = new ParOps(p)
 
